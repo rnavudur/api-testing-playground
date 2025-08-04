@@ -44,7 +44,11 @@ import {
 
 export default function Home() {
   const { toast } = useToast();
-  const { user } = useAuth();
+  const { user, isLoading: authLoading } = useAuth();
+  
+  // Debug logging
+  console.log('Home component - user:', user);
+  console.log('Home component - authLoading:', authLoading);
   
   // UI State
   const [showSidebar, setShowSidebar] = useState(true);
@@ -56,13 +60,13 @@ export default function Home() {
   const [method, setMethod] = useState<ApiRequestConfig["method"]>("GET");
   const [url, setUrl] = useState("https://api.openweathermap.org/data/2.5/weather");
   const [headers, setHeaders] = useState([
-    { key: "Authorization", value: "Bearer your-api-key-here" },
-    { key: "Content-Type", value: "application/json" },
-    { key: "", value: "" }
+    { key: "Authorization", value: "Bearer your-api-key-here", enabled: true },
+    { key: "Content-Type", value: "application/json", enabled: true },
+    { key: "", value: "", enabled: true }
   ]);
   const [queryParams, setQueryParams] = useState([
-    { key: "q", value: "London" },
-    { key: "", value: "" }
+    { key: "q", value: "London", enabled: true },
+    { key: "", value: "", enabled: true }
   ]);
   const [body, setBody] = useState(`{
   "name": "John Doe",
@@ -130,13 +134,13 @@ export default function Home() {
 
   const handleSendRequest = () => {
     // Build headers and query params objects
-    const headersObj = headers.reduce((acc, { key, value }) => {
-      if (key && value) acc[key] = value;
+    const headersObj = headers.reduce((acc, { key, value, enabled }) => {
+      if (key && value && enabled) acc[key] = value;
       return acc;
     }, {} as Record<string, string>);
 
-    const queryParamsObj = queryParams.reduce((acc, { key, value }) => {
-      if (key && value) acc[key] = value;
+    const queryParamsObj = queryParams.reduce((acc, { key, value, enabled }) => {
+      if (key && value && enabled) acc[key] = value;
       return acc;
     }, {} as Record<string, string>);
 
@@ -424,11 +428,11 @@ export default function Home() {
             <div className="flex-1 overflow-hidden">
               <Tabs value={sidebarTab} onValueChange={setSidebarTab} className="h-full">
                 <TabsContent value="suggestions" className="h-full m-0 p-4 overflow-y-auto">
-                  <ApiSuggestions onSelectApi={handleSelectApiSuggestion} />
+                  <ApiSuggestions onSelect={handleSelectApiSuggestion} />
                 </TabsContent>
                 
                 <TabsContent value="templates" className="h-full m-0 p-4 overflow-y-auto">
-                  <RequestTemplates onSelectTemplate={handleSelectTemplate} />
+                  <RequestTemplates onSelect={handleSelectTemplate} />
                 </TabsContent>
                 
                 <TabsContent value="analysis" className="h-full m-0 p-4 overflow-y-auto space-y-4">

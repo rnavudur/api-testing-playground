@@ -1,75 +1,80 @@
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Plus, Trash2 } from "lucide-react";
+import { Trash2, Plus } from "lucide-react";
 
 interface KeyValuePair {
   key: string;
   value: string;
+  enabled: boolean;
 }
 
 interface KeyValueEditorProps {
   pairs: KeyValuePair[];
   onChange: (pairs: KeyValuePair[]) => void;
+  placeholder?: { key: string; value: string };
   keyPlaceholder?: string;
   valuePlaceholder?: string;
 }
 
-export function KeyValueEditor({
-  pairs,
-  onChange,
-  keyPlaceholder = "Key",
-  valuePlaceholder = "Value",
-}: KeyValueEditorProps) {
-  const updatePair = (index: number, field: "key" | "value", newValue: string) => {
+export function KeyValueEditor({ pairs, onChange, placeholder, keyPlaceholder, valuePlaceholder }: KeyValueEditorProps) {
+  const addPair = () => {
+    onChange([
+      ...pairs,
+      { key: "", value: "", enabled: true }
+    ]);
+  };
+
+  const updatePair = (index: number, field: keyof KeyValuePair, value: string | boolean) => {
     const newPairs = [...pairs];
-    newPairs[index] = { ...newPairs[index], [field]: newValue };
+    newPairs[index] = { ...newPairs[index], [field]: value };
     onChange(newPairs);
   };
 
   const removePair = (index: number) => {
-    const newPairs = pairs.filter((_, i) => i !== index);
-    onChange(newPairs);
-  };
-
-  const addPair = () => {
-    onChange([...pairs, { key: "", value: "" }]);
+    onChange(pairs.filter((_, i) => i !== index));
   };
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-2">
       {pairs.map((pair, index) => (
-        <div key={index} className="flex items-center space-x-3">
-          <Input
-            placeholder={keyPlaceholder}
-            value={pair.key}
-            onChange={(e) => updatePair(index, "key", e.target.value)}
-            className="flex-1 font-mono text-sm"
+        <div key={index} className="flex items-center space-x-2">
+          <input
+            type="checkbox"
+            checked={pair.enabled}
+            onChange={(e) => updatePair(index, "enabled", e.target.checked)}
+            className="rounded border-slate-300"
           />
           <Input
-            placeholder={valuePlaceholder}
+            placeholder={keyPlaceholder || placeholder?.key || "Key"}
+            value={pair.key}
+            onChange={(e) => updatePair(index, "key", e.target.value)}
+            className="flex-1"
+          />
+          <Input
+            placeholder={valuePlaceholder || placeholder?.value || "Value"}
             value={pair.value}
             onChange={(e) => updatePair(index, "value", e.target.value)}
-            className="flex-1 font-mono text-sm"
+            className="flex-1"
           />
           <Button
             variant="ghost"
             size="sm"
             onClick={() => removePair(index)}
-            className="text-red-500 hover:text-red-700 p-2"
+            className="text-red-600 hover:text-red-700"
           >
-            <Trash2 className="h-4 w-4" />
+            <Trash2 size={16} />
           </Button>
         </div>
       ))}
-      
       <Button
-        variant="ghost"
+        variant="outline"
         size="sm"
         onClick={addPair}
-        className="text-blue-500 hover:text-blue-700 flex items-center"
+        className="w-full"
       >
-        <Plus className="h-4 w-4 mr-2" />
-        Add {keyPlaceholder}
+        <Plus size={16} className="mr-2" />
+        Add {placeholder?.key || "Parameter"}
       </Button>
     </div>
   );
