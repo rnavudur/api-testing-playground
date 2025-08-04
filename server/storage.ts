@@ -98,6 +98,7 @@ export class MemStorage implements IStorage {
     const apiRequest: ApiRequest = { 
       ...insertRequest, 
       id,
+      userId: insertRequest.userId ?? null,
       body: insertRequest.body || null,
       headers: insertRequest.headers || null,
       queryParams: insertRequest.queryParams || null,
