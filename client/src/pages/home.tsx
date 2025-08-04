@@ -258,13 +258,13 @@ export default function Home() {
     setUrl(suggestion.config.url);
     
     // Convert headers to key-value pairs
-    const headerPairs = Object.entries(suggestion.config.headers || {}).map(([key, value]) => ({ key, value: String(value) }));
-    headerPairs.push({ key: "", value: "" });
+    const headerPairs = Object.entries(suggestion.config.headers || {}).map(([key, value]) => ({ key, value: String(value), enabled: true }));
+    headerPairs.push({ key: "", value: "", enabled: true });
     setHeaders(headerPairs);
     
     // Convert query params to key-value pairs
-    const paramPairs = Object.entries(suggestion.config.queryParams || {}).map(([key, value]) => ({ key, value: String(value) }));
-    paramPairs.push({ key: "", value: "" });
+    const paramPairs = Object.entries(suggestion.config.queryParams || {}).map(([key, value]) => ({ key, value: String(value), enabled: true }));
+    paramPairs.push({ key: "", value: "", enabled: true });
     setQueryParams(paramPairs);
     
     if (suggestion.config.body) {
@@ -293,17 +293,19 @@ export default function Home() {
     // Process headers
     const processedHeaders = Object.entries(template.config.headers || {}).map(([key, value]) => ({
       key,
-      value: replaceVariables(String(value))
+      value: replaceVariables(String(value)),
+      enabled: true
     }));
-    processedHeaders.push({ key: "", value: "" });
+    processedHeaders.push({ key: "", value: "", enabled: true });
     setHeaders(processedHeaders);
     
     // Process query params
     const processedParams = Object.entries(template.config.queryParams || {}).map(([key, value]) => ({
       key,
-      value: replaceVariables(String(value))
+      value: replaceVariables(String(value)),
+      enabled: true
     }));
-    processedParams.push({ key: "", value: "" });
+    processedParams.push({ key: "", value: "", enabled: true });
     setQueryParams(processedParams);
     
     if (template.config.body) {
@@ -446,18 +448,26 @@ export default function Home() {
                 </TabsContent>
                 
                 <TabsContent value="templates" className="h-full m-0 p-4 overflow-y-auto">
-                  <RequestTemplates onSelect={handleSelectTemplate} />
+                  <RequestTemplates onSelect={(template) => handleSelectTemplate(template, {})} />
                 </TabsContent>
                 
                 <TabsContent value="analysis" className="h-full m-0 p-4 overflow-y-auto space-y-4">
                   <RequestAnalyzer 
-                    response={response} 
-                    requestUrl={url}
-                    requestHeaders={headers.reduce((acc, h) => h.key && h.value ? {...acc, [h.key]: h.value} : acc, {})}
+                    url={url}
+                    method={method}
+                    headers={headers.reduce((acc, h) => h.key && h.value ? {...acc, [h.key]: h.value} : acc, {})}
+                    responseTime={response?.responseTime ? parseInt(response.responseTime.replace('ms', '')) : undefined}
+                    statusCode={response?.statusCode ? parseInt(response.statusCode) : undefined}
                   />
                   <ResponseDiff 
-                    currentResponse={response?.data} 
-                    historyRequests={history}
+                    responses={history.map(item => ({
+                      id: item.id,
+                      url: item.url,
+                      method: item.method,
+                      timestamp: item.createdAt || new Date(),
+                      data: item.response,
+                      status: parseInt(item.statusCode || '200')
+                    }))}
                   />
                 </TabsContent>
                 
