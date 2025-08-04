@@ -19,6 +19,13 @@ export class MemStorage implements IStorage {
     const apiRequest: ApiRequest = { 
       ...insertRequest, 
       id,
+      body: insertRequest.body || null,
+      headers: insertRequest.headers || null,
+      queryParams: insertRequest.queryParams || null,
+      responseHeaders: insertRequest.responseHeaders || null,
+      status: insertRequest.status || null,
+      statusCode: insertRequest.statusCode || null,
+      responseTime: insertRequest.responseTime || null,
       createdAt: new Date()
     };
     this.apiRequests.set(id, apiRequest);

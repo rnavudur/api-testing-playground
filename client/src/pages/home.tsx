@@ -10,6 +10,10 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { KeyValueEditor } from "@/components/key-value-editor";
 import { JsonViewer } from "@/components/json-viewer";
+import { ApiSuggestions } from "@/components/api-suggestions";
+import { RequestAnalyzer } from "@/components/request-analyzer";
+import { RequestTemplates } from "@/components/request-templates";
+import { ResponseDiff } from "@/components/response-diff";
 import { makeApiRequest, getRequestHistory } from "@/lib/api-client";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient } from "@/lib/queryClient";
@@ -24,14 +28,20 @@ import {
   X, 
   Clock,
   Plus,
-  Wand2
+  Wand2,
+  Sparkles,
+  BookOpen,
+  BarChart3,
+  GitCompare,
+  Lightbulb
 } from "lucide-react";
 
 export default function Home() {
   const { toast } = useToast();
   
   // UI State
-  const [showHistory, setShowHistory] = useState(true);
+  const [showSidebar, setShowSidebar] = useState(true);
+  const [sidebarTab, setSidebarTab] = useState("suggestions");
   const [activeTab, setActiveTab] = useState("headers");
   const [responseTab, setResponseTab] = useState("body");
   
@@ -191,6 +201,70 @@ export default function Home() {
     return bytes > 1024 ? `${(bytes / 1024).toFixed(1)} KB` : `${bytes} bytes`;
   };
 
+  // Handlers for unique features
+  const handleSelectApiSuggestion = (suggestion: any) => {
+    setMethod(suggestion.config.method);
+    setUrl(suggestion.config.url);
+    
+    // Convert headers to key-value pairs
+    const headerPairs = Object.entries(suggestion.config.headers || {}).map(([key, value]) => ({ key, value }));
+    headerPairs.push({ key: "", value: "" });
+    setHeaders(headerPairs);
+    
+    // Convert query params to key-value pairs
+    const paramPairs = Object.entries(suggestion.config.queryParams || {}).map(([key, value]) => ({ key, value }));
+    paramPairs.push({ key: "", value: "" });
+    setQueryParams(paramPairs);
+    
+    if (suggestion.config.body) {
+      setBody(suggestion.config.body);
+    }
+
+    toast({
+      title: "API loaded",
+      description: `${suggestion.name} configuration has been applied`,
+    });
+  };
+
+  const handleSelectTemplate = (template: any, variables: Record<string, string>) => {
+    // Replace variables in the template
+    const replaceVariables = (text: string): string => {
+      let result = text;
+      Object.entries(variables).forEach(([key, value]) => {
+        result = result.replace(new RegExp(`\\{\\{${key}\\}\\}`, 'g'), value);
+      });
+      return result;
+    };
+
+    setMethod(template.config.method);
+    setUrl(replaceVariables(template.config.url));
+    
+    // Process headers
+    const processedHeaders = Object.entries(template.config.headers || {}).map(([key, value]) => ({
+      key,
+      value: replaceVariables(value)
+    }));
+    processedHeaders.push({ key: "", value: "" });
+    setHeaders(processedHeaders);
+    
+    // Process query params
+    const processedParams = Object.entries(template.config.queryParams || {}).map(([key, value]) => ({
+      key,
+      value: replaceVariables(value)
+    }));
+    processedParams.push({ key: "", value: "" });
+    setQueryParams(processedParams);
+    
+    if (template.config.body) {
+      setBody(replaceVariables(template.config.body));
+    }
+
+    toast({
+      title: "Template applied",
+      description: `${template.name} template has been configured`,
+    });
+  };
+
   return (
     <div className="min-h-screen bg-slate-50">
       {/* Header */}
@@ -208,11 +282,11 @@ export default function Home() {
           <div className="flex items-center space-x-3">
             <Button
               variant="ghost"
-              onClick={() => setShowHistory(!showHistory)}
+              onClick={() => setShowSidebar(!showSidebar)}
               className="text-slate-600 hover:text-slate-900"
             >
-              <History className="mr-2" size={16} />
-              History
+              <Sparkles className="mr-2" size={16} />
+              AI Tools
             </Button>
             <Button className="bg-blue-500 hover:bg-blue-600">
               <Save className="mr-2" size={16} />
@@ -223,52 +297,116 @@ export default function Home() {
       </header>
 
       <div className="flex h-[calc(100vh-81px)]">
-        {/* History Sidebar */}
-        {showHistory && (
-          <div className="w-80 bg-white border-r border-slate-200 flex flex-col">
+        {/* Intelligent Sidebar */}
+        {showSidebar && (
+          <div className="w-96 bg-white border-r border-slate-200 flex flex-col">
+            {/* Sidebar Header */}
             <div className="p-4 border-b border-slate-200">
-              <div className="flex items-center justify-between">
-                <h2 className="font-medium text-slate-900">Request History</h2>
+              <div className="flex items-center justify-between mb-3">
+                <h2 className="font-medium text-slate-900 flex items-center">
+                  <Sparkles className="mr-2 text-blue-600" size={18} />
+                  AI-Powered Tools
+                </h2>
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => setShowHistory(false)}
+                  onClick={() => setShowSidebar(false)}
                   className="text-slate-400 hover:text-slate-600 p-1"
                 >
                   <X size={16} />
                 </Button>
               </div>
+              
+              {/* Sidebar Tabs */}
+              <Tabs value={sidebarTab} onValueChange={setSidebarTab} className="w-full">
+                <TabsList className="grid grid-cols-4 w-full bg-slate-100">
+                  <TabsTrigger 
+                    value="suggestions" 
+                    className="text-xs data-[state=active]:bg-white"
+                  >
+                    <Lightbulb size={12} className="mr-1" />
+                    APIs
+                  </TabsTrigger>
+                  <TabsTrigger 
+                    value="templates" 
+                    className="text-xs data-[state=active]:bg-white"
+                  >
+                    <BookOpen size={12} className="mr-1" />
+                    Templates
+                  </TabsTrigger>
+                  <TabsTrigger 
+                    value="analysis" 
+                    className="text-xs data-[state=active]:bg-white"
+                  >
+                    <BarChart3 size={12} className="mr-1" />
+                    Analysis
+                  </TabsTrigger>
+                  <TabsTrigger 
+                    value="history" 
+                    className="text-xs data-[state=active]:bg-white"
+                  >
+                    <History size={12} className="mr-1" />
+                    History
+                  </TabsTrigger>
+                </TabsList>
+              </Tabs>
             </div>
-            <div className="flex-1 overflow-y-auto p-4 space-y-2">
-              {history.map((item) => (
-                <Card
-                  key={item.id}
-                  className="cursor-pointer hover:bg-slate-50 transition-colors"
-                  onClick={() => loadHistoryItem(item)}
-                >
-                  <CardContent className="p-3">
-                    <div className="flex items-center justify-between mb-2">
-                      <Badge className={getMethodColor(item.method)}>
-                        {item.method}
-                      </Badge>
-                      <span className="text-xs text-slate-500 flex items-center">
-                        <Clock size={12} className="mr-1" />
-                        {item.createdAt ? new Date(item.createdAt).toLocaleString() : "Unknown"}
-                      </span>
+
+            {/* Sidebar Content */}
+            <div className="flex-1 overflow-hidden">
+              <Tabs value={sidebarTab} onValueChange={setSidebarTab} className="h-full">
+                <TabsContent value="suggestions" className="h-full m-0 p-4 overflow-y-auto">
+                  <ApiSuggestions onSelectApi={handleSelectApiSuggestion} />
+                </TabsContent>
+                
+                <TabsContent value="templates" className="h-full m-0 p-4 overflow-y-auto">
+                  <RequestTemplates onSelectTemplate={handleSelectTemplate} />
+                </TabsContent>
+                
+                <TabsContent value="analysis" className="h-full m-0 p-4 overflow-y-auto space-y-4">
+                  <RequestAnalyzer 
+                    response={response} 
+                    requestUrl={url}
+                    requestHeaders={headers.reduce((acc, h) => h.key && h.value ? {...acc, [h.key]: h.value} : acc, {})}
+                  />
+                  <ResponseDiff 
+                    currentResponse={response?.data} 
+                    historyRequests={history}
+                  />
+                </TabsContent>
+                
+                <TabsContent value="history" className="h-full m-0 p-4 overflow-y-auto space-y-2">
+                  {history.map((item) => (
+                    <Card
+                      key={item.id}
+                      className="cursor-pointer hover:bg-slate-50 transition-colors"
+                      onClick={() => loadHistoryItem(item)}
+                    >
+                      <CardContent className="p-3">
+                        <div className="flex items-center justify-between mb-2">
+                          <Badge className={getMethodColor(item.method)}>
+                            {item.method}
+                          </Badge>
+                          <span className="text-xs text-slate-500 flex items-center">
+                            <Clock size={12} className="mr-1" />
+                            {item.createdAt ? new Date(item.createdAt).toLocaleString() : "Unknown"}
+                          </span>
+                        </div>
+                        <p className="text-sm font-mono text-slate-700 truncate">{item.url}</p>
+                        <p className="text-xs text-slate-500 mt-1">
+                          Status: {item.statusCode} {item.status}
+                        </p>
+                      </CardContent>
+                    </Card>
+                  ))}
+                  {history.length === 0 && (
+                    <div className="text-center text-slate-500 py-8">
+                      <p className="text-sm">No requests yet</p>
+                      <p className="text-xs mt-1">Make your first API request to see history</p>
                     </div>
-                    <p className="text-sm font-mono text-slate-700 truncate">{item.url}</p>
-                    <p className="text-xs text-slate-500 mt-1">
-                      Status: {item.statusCode} {item.status}
-                    </p>
-                  </CardContent>
-                </Card>
-              ))}
-              {history.length === 0 && (
-                <div className="text-center text-slate-500 py-8">
-                  <p className="text-sm">No requests yet</p>
-                  <p className="text-xs mt-1">Make your first API request to see history</p>
-                </div>
-              )}
+                  )}
+                </TabsContent>
+              </Tabs>
             </div>
           </div>
         )}
