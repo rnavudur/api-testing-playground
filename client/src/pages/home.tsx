@@ -67,6 +67,9 @@ export default function Home() {
   // Request Configuration
   const [method, setMethod] = useState<ApiRequestConfig["method"]>("GET");
   const [url, setUrl] = useState("https://api.openweathermap.org/data/2.5/weather");
+  
+  // Log URL state after initialization
+  console.log('URL initialized to:', url);
   const [headers, setHeaders] = useState([
     { key: "Authorization", value: "Bearer your-api-key-here", enabled: true },
     { key: "Content-Type", value: "application/json", enabled: true },
@@ -456,8 +459,8 @@ export default function Home() {
                     url={url}
                     method={method}
                     headers={headers.reduce((acc, h) => h.key && h.value ? {...acc, [h.key]: h.value} : acc, {})}
-                    responseTime={response?.responseTime ? parseInt(response.responseTime.replace('ms', '')) : undefined}
-                    statusCode={response?.statusCode ? parseInt(response.statusCode) : undefined}
+                    responseTime={response?.responseTime ? parseInt(String(response.responseTime).replace('ms', '')) : undefined}
+                    statusCode={response?.status || undefined}
                   />
                   <ResponseDiff 
                     responses={history.map(item => ({
