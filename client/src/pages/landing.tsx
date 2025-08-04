@@ -293,9 +293,14 @@ export default function Landing() {
           <p className="text-slate-400 mb-6">
             The intelligent way to test and analyze APIs
           </p>
-          <div className="flex items-center justify-center space-x-2 text-sm">
+          <div className="flex items-center justify-center space-x-2 text-sm mb-4">
             <Star className="text-yellow-400" size={16} />
             <span>Built with intelligence and precision</span>
+          </div>
+          <div className="border-t border-slate-700 pt-6">
+            <p className="text-slate-500 text-sm">
+              © 2025 API Playground. All rights reserved to Rishitha Navuduru.
+            </p>
           </div>
         </div>
       </footer>
