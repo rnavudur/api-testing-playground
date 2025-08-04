@@ -54,7 +54,7 @@ export default function Signup() {
     onSuccess: () => {
       toast({
         title: "Account created successfully!",
-        description: "Welcome to API Playground. You can now sign in.",
+        description: "Welcome to API Playground. Please sign in to continue.",
       });
       setLocation("/login");
     },

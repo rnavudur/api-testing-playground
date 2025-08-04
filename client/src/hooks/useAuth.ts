@@ -8,15 +8,23 @@ export function useAuth() {
     queryFn: async () => {
       try {
         const response = await apiRequest("GET", "/api/auth/user");
+        if (!response.ok) {
+          if (response.status === 401) {
+            return null;
+          }
+          throw new Error(`HTTP ${response.status}`);
+        }
         return response.json();
       } catch (err: any) {
-        if (err.message?.includes("401")) {
+        if (err.message?.includes("401") || err.message?.includes("Unauthorized")) {
           return null;
         }
         throw err;
       }
     },
     retry: false,
+    staleTime: 0, // Always refetch to ensure fresh auth state
+    gcTime: 0,    // Don't cache auth state
   });
 
   return {
