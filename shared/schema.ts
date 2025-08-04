@@ -5,6 +5,7 @@ import { z } from "zod";
 
 export const apiRequests = pgTable("api_requests", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").references(() => users.id),
   method: text("method").notNull(),
   url: text("url").notNull(),
   headers: jsonb("headers").$type<Record<string, string>>().default({}),

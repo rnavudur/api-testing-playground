@@ -78,30 +78,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/auth/login", async (req, res) => {
     try {
-      const credentials = loginSchema.parse(req.body);
+      const data = loginSchema.parse(req.body);
       
-      const user = await authService.authenticateUser(credentials);
+      // Find user by email
+      const user = await storage.findUserByEmail(data.email);
       if (!user) {
-        return res.status(401).json({ message: "Invalid credentials" });
+        return res.status(401).json({ message: "Invalid email or password" });
       }
 
-      // Set session
-      (req.session as any).userId = user.id;
+      // Verify password
+      const isValid = await authService.verifyPassword(data.password, user.password);
+      if (!isValid) {
+        return res.status(401).json({ message: "Invalid email or password" });
+      }
 
-      res.json({
-        message: "Login successful",
-        user: {
-          id: user.id,
-          email: user.email,
-          username: user.username,
-          firstName: user.firstName,
-          lastName: user.lastName,
+      // Set session and save it
+      (req.session as any).userId = user.id;
+      
+      req.session.save((err) => {
+        if (err) {
+          console.error("Session save error:", err);
+          return res.status(500).json({ message: "Session save failed" });
         }
+        
+        res.json({ 
+          message: "Login successful",
+          user: {
+            id: user.id,
+            email: user.email,
+            username: user.username,
+            firstName: user.firstName,
+            lastName: user.lastName,
+          }
+        });
       });
     } catch (error: any) {
       console.error("Login error:", error);
       if (error.name === 'ZodError') {
-        return res.status(400).json({ message: "Invalid input data" });
+        return res.status(400).json({ message: "Invalid input data", errors: error.errors });
       }
       res.status(500).json({ message: "Login failed" });
     }
@@ -164,7 +178,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const responseTime = `${Date.now() - startTime}ms`;
 
-      // Store the request and response
+      // Store the request and response with user ID
+      const userId = (req.session as any)?.userId;
       const apiRequest = await storage.createApiRequest({
         method: config.method,
         url: config.url,
@@ -176,6 +191,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         status: response.statusText,
         statusCode: response.status.toString(),
         responseTime,
+        userId,
       });
 
       res.json({
@@ -214,7 +230,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get request history
   app.get("/api/history", requireAuth, async (req, res) => {
     try {
-      const history = await storage.getApiRequests();
+      const userId = (req.session as any)?.userId;
+      const history = await storage.getApiRequestsByUserId(userId);
       res.json(history);
     } catch (error) {
       res.status(500).json({ error: "Failed to fetch history" });

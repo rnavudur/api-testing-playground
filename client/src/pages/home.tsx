@@ -16,12 +16,20 @@ import { ApiSuggestions } from "@/components/api-suggestions";
 import { RequestAnalyzer } from "@/components/request-analyzer";
 import { RequestTemplates } from "@/components/request-templates";
 import { ResponseDiff } from "@/components/response-diff";
-import { makeApiRequest, getRequestHistory } from "@/lib/api-client";
+// API response type definition
+interface ApiResponse {
+  id: string;
+  data: any;
+  status: number;
+  statusText: string;
+  headers: Record<string, string>;
+  responseTime: string;
+}
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import type { ApiRequestConfig, ApiRequest } from "@shared/schema";
-import type { ApiResponse } from "@/lib/api-client";
+
 import { 
   FlaskConical, 
   Send, 
@@ -82,6 +90,12 @@ export default function Home() {
   const { data: history = [] } = useQuery<ApiRequest[]>({
     queryKey: ["/api/history"],
   });
+
+  // Make API request function
+  async function makeApiRequest(config: ApiRequestConfig) {
+    const response = await apiRequest("POST", "/api/proxy", config);
+    return response.json();
+  }
 
   // Make API request mutation
   const apiMutation = useMutation({

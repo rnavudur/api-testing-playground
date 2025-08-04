@@ -7,6 +7,7 @@ export interface IStorage {
   // API Request operations
   createApiRequest(request: InsertApiRequest): Promise<ApiRequest>;
   getApiRequests(): Promise<ApiRequest[]>;
+  getApiRequestsByUserId(userId: string): Promise<ApiRequest[]>;
   getApiRequest(id: string): Promise<ApiRequest | undefined>;
   
   // User operations for authentication
@@ -30,6 +31,14 @@ export class DatabaseStorage implements IStorage {
     return await db
       .select()
       .from(apiRequests)
+      .orderBy(apiRequests.createdAt);
+  }
+
+  async getApiRequestsByUserId(userId: string): Promise<ApiRequest[]> {
+    return await db
+      .select()
+      .from(apiRequests)
+      .where(eq(apiRequests.userId, userId))
       .orderBy(apiRequests.createdAt);
   }
 
@@ -111,6 +120,12 @@ export class MemStorage implements IStorage {
 
   async getApiRequest(id: string): Promise<ApiRequest | undefined> {
     return this.apiRequests.get(id);
+  }
+
+  async getApiRequestsByUserId(userId: string): Promise<ApiRequest[]> {
+    return Array.from(this.apiRequests.values())
+      .filter(req => req.userId === userId)
+      .sort((a, b) => (b.createdAt?.getTime() || 0) - (a.createdAt?.getTime() || 0));
   }
 
   // User operations for authentication
