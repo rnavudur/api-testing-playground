@@ -511,45 +511,56 @@ export default function Home() {
         )}
 
         {/* Main Content */}
-        <div className="flex-1 flex">
-          {/* Request Panel */}
-          <div className="flex-1 flex flex-col bg-white">
-            {/* Request URL Section */}
-            <div className="p-6 border-b border-slate-200">
-              <div className="flex items-center space-x-3 mb-4">
-                <h2 className="text-lg font-semibold text-slate-900">Request Configuration</h2>
-              </div>
-              <div className="flex space-x-3">
-                <Select value={method} onValueChange={(value: any) => setMethod(value)}>
-                  <SelectTrigger className="min-w-[120px] font-mono font-medium">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="GET">GET</SelectItem>
-                    <SelectItem value="POST">POST</SelectItem>
-                    <SelectItem value="PUT">PUT</SelectItem>
-                    <SelectItem value="DELETE">DELETE</SelectItem>
-                    <SelectItem value="PATCH">PATCH</SelectItem>
-                  </SelectContent>
-                </Select>
-                <Input
-                  type="url"
-                  placeholder="Enter API endpoint URL (e.g., https://api.openweathermap.org/data/2.5/weather)"
-                  className="flex-1 font-mono text-sm"
-                  value={url}
-                  onChange={(e) => setUrl(e.target.value)}
-                />
-                <Button
-                  onClick={handleSendRequest}
-                  disabled={apiMutation.isPending}
-                  className="bg-blue-500 hover:bg-blue-600"
-                >
-                  <Send className="mr-2" size={16} />
-                  {apiMutation.isPending ? "Sending..." : "Send"}
-                </Button>
+        <div className="flex-1 flex flex-col">
+          {/* LARGE URL INPUT SECTION - This should be very visible */}
+          <div className="bg-white border-b-2 border-blue-200 p-8">
+            <div className="max-w-6xl mx-auto">
+              <h2 className="text-2xl font-bold text-slate-900 mb-6 text-center">
+                🚀 API Testing Playground
+              </h2>
+              <div className="bg-gradient-to-r from-blue-50 to-purple-50 p-6 rounded-xl border-2 border-blue-300">
+                <label className="block text-lg font-semibold text-slate-700 mb-3">
+                  Enter API URL to Test:
+                </label>
+                <div className="flex space-x-4">
+                  <Select value={method} onValueChange={(value: any) => setMethod(value)}>
+                    <SelectTrigger className="w-32 h-12 text-lg font-bold bg-white border-2">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="GET">GET</SelectItem>
+                      <SelectItem value="POST">POST</SelectItem>
+                      <SelectItem value="PUT">PUT</SelectItem>
+                      <SelectItem value="DELETE">DELETE</SelectItem>
+                      <SelectItem value="PATCH">PATCH</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <Input
+                    type="url"
+                    placeholder="Type URL here: https://jsonplaceholder.typicode.com/posts/1"
+                    className="flex-1 h-12 text-lg px-4 bg-white border-2 border-blue-300 focus:border-blue-500"
+                    value={url}
+                    onChange={(e) => setUrl(e.target.value)}
+                  />
+                  <Button
+                    onClick={handleSendRequest}
+                    disabled={apiMutation.isPending}
+                    className="h-12 px-8 text-lg bg-blue-500 hover:bg-blue-600 font-bold"
+                  >
+                    <Send className="mr-2" size={20} />
+                    {apiMutation.isPending ? "Sending..." : "SEND REQUEST"}
+                  </Button>
+                </div>
+                <p className="text-sm text-slate-600 mt-3 text-center">
+                  Try: https://jsonplaceholder.typicode.com/posts/1 or https://restcountries.com/v3.1/name/usa
+                </p>
               </div>
             </div>
+          </div>
 
+          {/* Request Panel */}
+          <div className="flex-1 flex">
+            <div className="flex-1 flex flex-col bg-white">
             {/* Request Configuration Tabs */}
             <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col">
               <div className="border-b border-slate-200">
@@ -753,6 +764,7 @@ export default function Home() {
               </div>
             )}
           </div>
+        </div>
         </div>
       </div>
     </div>
