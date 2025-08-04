@@ -66,7 +66,7 @@ export default function Home() {
   
   // Request Configuration
   const [method, setMethod] = useState<ApiRequestConfig["method"]>("GET");
-  const [url, setUrl] = useState("https://api.openweathermap.org/data/2.5/weather");
+  const [url, setUrl] = useState("https://jsonplaceholder.typicode.com/posts/1");
   
   // Log URL state after initialization
   console.log('URL initialized to:', url);
