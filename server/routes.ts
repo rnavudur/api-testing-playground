@@ -1,12 +1,147 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertApiRequestSchema, apiRequestConfigSchema } from "@shared/schema";
+import { insertApiRequestSchema, apiRequestConfigSchema, loginSchema, signupSchema } from "@shared/schema";
 import axios from "axios";
+import session from "express-session";
+import connectPg from "connect-pg-simple";
+import { authService } from "./auth";
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Session configuration
+  const pgStore = connectPg(session);
+  app.use(session({
+    store: new pgStore({
+      conString: process.env.DATABASE_URL,
+      createTableIfMissing: true,
+    }),
+    secret: process.env.SESSION_SECRET || 'dev-secret-change-in-production',
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      secure: false, // Set to true in production with HTTPS
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 1 week
+    },
+  }));
+
+  // Authentication middleware
+  const requireAuth = (req: any, res: any, next: any) => {
+    if (!req.session.userId) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+    next();
+  };
+
+  // Authentication routes
+  app.post("/api/auth/signup", async (req, res) => {
+    try {
+      const data = signupSchema.parse(req.body);
+      
+      // Check if user already exists
+      const existingUser = await storage.findUserByEmail(data.email);
+      if (existingUser) {
+        return res.status(400).json({ message: "User with this email already exists" });
+      }
+
+      const existingUsername = await storage.findUserByUsername(data.username);
+      if (existingUsername) {
+        return res.status(400).json({ message: "Username already taken" });
+      }
+
+      // Create user
+      const user = await authService.createUser({
+        email: data.email,
+        username: data.username,
+        firstName: data.firstName,
+        lastName: data.lastName,
+        password: data.password,
+      });
+
+      res.status(201).json({ 
+        message: "User created successfully",
+        user: {
+          id: user.id,
+          email: user.email,
+          username: user.username,
+          firstName: user.firstName,
+          lastName: user.lastName,
+        }
+      });
+    } catch (error: any) {
+      console.error("Signup error:", error);
+      if (error.name === 'ZodError') {
+        return res.status(400).json({ message: "Invalid input data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to create user" });
+    }
+  });
+
+  app.post("/api/auth/login", async (req, res) => {
+    try {
+      const credentials = loginSchema.parse(req.body);
+      
+      const user = await authService.authenticateUser(credentials);
+      if (!user) {
+        return res.status(401).json({ message: "Invalid credentials" });
+      }
+
+      // Set session
+      (req.session as any).userId = user.id;
+
+      res.json({
+        message: "Login successful",
+        user: {
+          id: user.id,
+          email: user.email,
+          username: user.username,
+          firstName: user.firstName,
+          lastName: user.lastName,
+        }
+      });
+    } catch (error: any) {
+      console.error("Login error:", error);
+      if (error.name === 'ZodError') {
+        return res.status(400).json({ message: "Invalid input data" });
+      }
+      res.status(500).json({ message: "Login failed" });
+    }
+  });
+
+  app.post("/api/auth/logout", (req, res) => {
+    req.session.destroy((err) => {
+      if (err) {
+        return res.status(500).json({ message: "Logout failed" });
+      }
+      res.json({ message: "Logout successful" });
+    });
+  });
+
+  app.get("/api/auth/user", async (req, res) => {
+    try {
+      const userId = (req.session as any)?.userId;
+      if (!userId) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+
+      const user = await storage.findUserById(userId);
+      if (!user) {
+        return res.status(401).json({ message: "User not found" });
+      }
+
+      res.json({
+        id: user.id,
+        email: user.email,
+        username: user.username,
+        firstName: user.firstName,
+        lastName: user.lastName,
+      });
+    } catch (error) {
+      console.error("User fetch error:", error);
+      res.status(500).json({ message: "Failed to fetch user" });
+    }
+  });
   // Proxy API requests to handle CORS
-  app.post("/api/proxy", async (req, res) => {
+  app.post("/api/proxy", requireAuth, async (req, res) => {
     try {
       const config = apiRequestConfigSchema.parse(req.body);
       const startTime = Date.now();
@@ -77,7 +212,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get request history
-  app.get("/api/history", async (req, res) => {
+  app.get("/api/history", requireAuth, async (req, res) => {
     try {
       const history = await storage.getApiRequests();
       res.json(history);
@@ -87,7 +222,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get specific request
-  app.get("/api/history/:id", async (req, res) => {
+  app.get("/api/history/:id", requireAuth, async (req, res) => {
     try {
       const request = await storage.getApiRequest(req.params.id);
       if (!request) {

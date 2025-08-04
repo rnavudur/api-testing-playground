@@ -8,6 +8,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { KeyValueEditor } from "@/components/key-value-editor";
 import { JsonViewer } from "@/components/json-viewer";
 import { ApiSuggestions } from "@/components/api-suggestions";
@@ -16,7 +18,8 @@ import { RequestTemplates } from "@/components/request-templates";
 import { ResponseDiff } from "@/components/response-diff";
 import { makeApiRequest, getRequestHistory } from "@/lib/api-client";
 import { useToast } from "@/hooks/use-toast";
-import { queryClient } from "@/lib/queryClient";
+import { useAuth } from "@/hooks/useAuth";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 import type { ApiRequestConfig, ApiRequest } from "@shared/schema";
 import type { ApiResponse } from "@/lib/api-client";
 import { 
@@ -33,11 +36,15 @@ import {
   BookOpen,
   BarChart3,
   GitCompare,
-  Lightbulb
+  Lightbulb,
+  LogOut,
+  User,
+  Settings
 } from "lucide-react";
 
 export default function Home() {
   const { toast } = useToast();
+  const { user } = useAuth();
   
   // UI State
   const [showSidebar, setShowSidebar] = useState(true);
@@ -90,6 +97,32 @@ export default function Home() {
       toast({
         title: "Request failed",
         description: err.message || "An error occurred while making the request",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Logout mutation
+  const logoutMutation = useMutation({
+    mutationFn: async () => {
+      const response = await apiRequest("POST", "/api/auth/logout", {});
+      if (!response.ok) {
+        throw new Error("Logout failed");
+      }
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
+      queryClient.clear();
+      toast({
+        title: "Logged out",
+        description: "You have been successfully logged out",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Logout failed",
+        description: error.message || "Could not log out",
         variant: "destructive",
       });
     },
@@ -207,12 +240,12 @@ export default function Home() {
     setUrl(suggestion.config.url);
     
     // Convert headers to key-value pairs
-    const headerPairs = Object.entries(suggestion.config.headers || {}).map(([key, value]) => ({ key, value }));
+    const headerPairs = Object.entries(suggestion.config.headers || {}).map(([key, value]) => ({ key, value: String(value) }));
     headerPairs.push({ key: "", value: "" });
     setHeaders(headerPairs);
     
     // Convert query params to key-value pairs
-    const paramPairs = Object.entries(suggestion.config.queryParams || {}).map(([key, value]) => ({ key, value }));
+    const paramPairs = Object.entries(suggestion.config.queryParams || {}).map(([key, value]) => ({ key, value: String(value) }));
     paramPairs.push({ key: "", value: "" });
     setQueryParams(paramPairs);
     
@@ -242,7 +275,7 @@ export default function Home() {
     // Process headers
     const processedHeaders = Object.entries(template.config.headers || {}).map(([key, value]) => ({
       key,
-      value: replaceVariables(value)
+      value: replaceVariables(String(value))
     }));
     processedHeaders.push({ key: "", value: "" });
     setHeaders(processedHeaders);
@@ -250,7 +283,7 @@ export default function Home() {
     // Process query params
     const processedParams = Object.entries(template.config.queryParams || {}).map(([key, value]) => ({
       key,
-      value: replaceVariables(value)
+      value: replaceVariables(String(value))
     }));
     processedParams.push({ key: "", value: "" });
     setQueryParams(processedParams);
@@ -288,10 +321,43 @@ export default function Home() {
               <Sparkles className="mr-2" size={16} />
               AI Tools
             </Button>
-            <Button className="bg-blue-500 hover:bg-blue-600">
-              <Save className="mr-2" size={16} />
-              Save Request
-            </Button>
+            
+            {/* User Menu */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="flex items-center space-x-2 text-slate-600 hover:text-slate-900">
+                  <Avatar className="w-8 h-8">
+                    <AvatarFallback className="bg-blue-500 text-white text-sm">
+                      {user?.firstName?.[0] || user?.username?.[0] || "U"}
+                    </AvatarFallback>
+                  </Avatar>
+                  <span className="hidden md:inline">{user?.firstName || user?.username}</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56">
+                <div className="px-2 py-1.5 text-sm text-slate-500">
+                  {user?.email}
+                </div>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem>
+                  <User className="mr-2 h-4 w-4" />
+                  Profile
+                </DropdownMenuItem>
+                <DropdownMenuItem>
+                  <Settings className="mr-2 h-4 w-4" />
+                  Settings
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem 
+                  onClick={() => logoutMutation.mutate()}
+                  disabled={logoutMutation.isPending}
+                  className="text-red-600 focus:text-red-600"
+                >
+                  <LogOut className="mr-2 h-4 w-4" />
+                  {logoutMutation.isPending ? "Signing out..." : "Sign out"}
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
       </header>
