@@ -299,12 +299,12 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-100 animate-gradient-x">
       {/* Header */}
-      <header className="bg-white border-b border-slate-200 px-6 py-4">
+      <header className="bg-white/80 backdrop-blur-md border-b border-slate-200 px-6 py-4 sticky top-0 z-50">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
-            <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center">
+            <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center animate-float">
               <FlaskConical className="text-white" size={16} />
             </div>
             <div>
@@ -327,11 +327,13 @@ export default function Home() {
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="flex items-center space-x-2 text-slate-600 hover:text-slate-900">
                   <Avatar className="w-8 h-8">
-                    <AvatarFallback className="bg-blue-500 text-white text-sm">
+                    <AvatarFallback className="bg-gradient-to-r from-blue-500 to-purple-600 text-white text-sm">
                       {user?.firstName?.[0] || user?.username?.[0] || "U"}
                     </AvatarFallback>
                   </Avatar>
-                  <span className="hidden md:inline">{user?.firstName || user?.username}</span>
+                  <span className="hidden md:inline font-medium">
+                    {user?.firstName ? `${user.firstName} ${user.lastName || ''}`.trim() : user?.username || 'User'}
+                  </span>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56">

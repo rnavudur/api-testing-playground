@@ -72,7 +72,7 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 flex items-center justify-center p-6">
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-100 flex items-center justify-center p-6 animate-gradient-x">
       <div className="w-full max-w-md">
         {/* Header */}
         <div className="text-center mb-8">
@@ -176,18 +176,30 @@ export default function Login() {
             </Form>
 
             {/* Demo Account */}
-            <div className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
+            <div className="mt-6 p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border border-blue-200">
               <h4 className="font-semibold text-blue-900 mb-2 flex items-center">
                 <Sparkles className="mr-2 text-blue-600" size={16} />
                 Try the Demo
               </h4>
               <p className="text-sm text-blue-700 mb-3">
-                Use these credentials to explore all features:
+                Click below to instantly try the demo account:
               </p>
-              <div className="space-y-1 text-sm font-mono">
-                <div className="text-blue-800">Email: demo@apiplayground.com</div>
-                <div className="text-blue-800">Password: demo123</div>
-              </div>
+              <Button
+                onClick={() => {
+                  form.setValue("email", "demo@apiplayground.com");
+                  form.setValue("password", "demo123");
+                  loginMutation.mutate({
+                    email: "demo@apiplayground.com",
+                    password: "demo123"
+                  });
+                }}
+                variant="outline"
+                className="w-full bg-white hover:bg-blue-50 border-blue-300 text-blue-700 transition-all duration-200"
+                disabled={loginMutation.isPending}
+              >
+                <Sparkles className="mr-2" size={16} />
+                {loginMutation.isPending ? "Loading Demo..." : "Launch Demo"}
+              </Button>
             </div>
 
             {/* Sign Up Link */}

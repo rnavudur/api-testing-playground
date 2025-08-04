@@ -79,13 +79,13 @@ export default function Landing() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-100 animate-gradient-x">
       {/* Header */}
       <header className="bg-white/80 backdrop-blur-md border-b border-slate-200 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl flex items-center justify-center">
+              <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl flex items-center justify-center animate-float">
                 <FlaskConical className="text-white" size={20} />
               </div>
               <div>
@@ -133,16 +133,18 @@ export default function Landing() {
             </p>
             
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
-              <Link href="/signup">
-                <Button size="lg" className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 px-8 py-4 text-lg">
+              <Link href="/login">
+                <Button size="lg" className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 px-8 py-4 text-lg transition-all duration-200 transform hover:scale-105 animate-pulse-glow">
                   <Play className="mr-2" size={20} />
                   Start Testing APIs
                 </Button>
               </Link>
-              <Button variant="outline" size="lg" className="px-8 py-4 text-lg border-slate-300 hover:bg-slate-50">
-                <Globe className="mr-2" size={20} />
-                View Demo
-              </Button>
+              <Link href="/login">
+                <Button variant="outline" size="lg" className="px-8 py-4 text-lg border-slate-300 hover:bg-slate-50 transition-all duration-200 transform hover:scale-105">
+                  <Globe className="mr-2" size={20} />
+                  Try Demo Account
+                </Button>
+              </Link>
             </div>
 
             {/* Stats */}
