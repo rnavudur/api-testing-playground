@@ -2,12 +2,14 @@
 
 This is a full-stack AI-powered API testing playground built with React and Express. Unlike basic tools like Postman, it includes intelligent features like API suggestions, request templates, live performance analysis, and response comparison. The application provides a comprehensive testing environment with syntax-highlighted responses, security scoring, and smart recommendations.
 
-## Authentication System Added (January 2025)
-- **Complete User Authentication**: Signup, login, and logout functionality with PostgreSQL database storage
-- **Beautiful Landing Page**: Professional design showcasing app features and capabilities
-- **Session Management**: Secure session-based authentication with express-session and PostgreSQL store
-- **User Dashboard**: Authenticated users access the full API playground with personalized experience
-- **Protected Routes**: All API testing features require authentication to ensure user data privacy
+## Recent Updates (August 2025)
+- **Complete Authentication System**: Signup, login, logout with PostgreSQL and bcryptjs encryption
+- **Demo Account Functionality**: One-click demo access (demo@apiplayground.com / demo123)
+- **Purple/Blue Gradient UI**: Updated from slate to modern purple/blue/indigo gradients
+- **Smooth Animations**: Floating icons, gradient movement, hover scales, and glow effects
+- **Fixed User Display**: Proper username/full name display in header dropdown
+- **Enhanced Routing**: Authentication-aware routing with proper redirects
+- **Backdrop Blur Effects**: Modern glassmorphism design with sticky headers
 
 # User Preferences
 
