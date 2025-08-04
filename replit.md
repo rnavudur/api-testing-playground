@@ -1,6 +1,6 @@
 # Overview
 
-This is a full-stack API testing and development tool built with React and Express. It provides a Postman-like interface for making HTTP requests, viewing responses, and managing request history. The application features a modern UI built with shadcn/ui components and supports real-time API testing with request/response logging.
+This is a full-stack AI-powered API testing playground built with React and Express. Unlike basic tools like Postman, it includes intelligent features like API suggestions, request templates, live performance analysis, and response comparison. The application provides a comprehensive testing environment with syntax-highlighted responses, security scoring, and smart recommendations.
 
 # User Preferences
 
@@ -32,6 +32,14 @@ Preferred communication style: Simple, everyday language.
 - **Proxy Pattern**: `/api/proxy` endpoint handles external API requests to bypass CORS
 - **Request Logging**: Automatic capture and storage of all API interactions
 - **Response Formatting**: Consistent response structure with metadata (status, timing, headers)
+
+## Unique Features Added (January 2025)
+- **AI-Powered Sidebar**: Four intelligent tabs (API Suggestions, Templates, Analysis, History)
+- **Smart API Suggestions**: Pre-configured popular APIs (OpenWeather, SpaceX, GitHub, etc.) with one-click setup
+- **Request Templates**: Configurable templates with variable substitution for common API patterns
+- **Live Request Analysis**: Real-time performance metrics, security scoring, and optimization suggestions
+- **Response Comparison**: Diff tool to compare responses between different API calls
+- **Enhanced JSON Viewer**: Custom syntax highlighting with proper formatting
 
 ## External Dependencies
 - **Neon Database**: PostgreSQL serverless database (configured but not actively used)
