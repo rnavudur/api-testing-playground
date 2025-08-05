@@ -44,17 +44,6 @@ Preferred communication style: Simple, everyday language.
 - **Request Logging**: Automatic capture and storage of all API interactions
 - **Response Formatting**: Consistent response structure with metadata (status, timing, headers)
 
-## Unique Features Added (January 2025)
-- **AI-Powered Sidebar**: Four intelligent tabs (API Suggestions, Templates, Analysis, History)
-- **Smart API Suggestions**: Pre-configured popular APIs (OpenWeather, SpaceX, GitHub, etc.) with one-click setup
-- **Request Templates**: Configurable templates with variable substitution for common API patterns
-- **Live Request Analysis**: Real-time performance metrics, security scoring, and optimization suggestions
-- **Response Comparison**: Diff tool to compare responses between different API calls
-- **Enhanced JSON Viewer**: Custom syntax highlighting with proper formatting
-- **Complete Authentication System**: Secure signup/login with beautiful UI and database storage
-- **Professional Landing Page**: Showcases features with modern design and clear value proposition
-- **User Profile Management**: Avatar display, dropdown menu with user info and logout functionality
-
 ## External Dependencies
 - **Neon Database**: PostgreSQL serverless database (configured but not actively used)
 - **Radix UI**: Headless UI components for accessibility and consistency
