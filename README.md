@@ -163,12 +163,6 @@ npm run db:studio    # Open database studio
 
 ## 🚢 Deployment
 
-### Replit Deployment (Recommended)
-1. Import this repository to Replit
-2. Set environment variables in Replit Secrets
-3. Click "Deploy" button
-4. Your app will be live at `https://yourapp.replit.app`
-
 ### Manual Deployment
 1. Build the application: `npm run build`
 2. Set production environment variables
@@ -193,13 +187,5 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - Powered by React, Express.js, and PostgreSQL
 - UI components from [shadcn/ui](https://ui.shadcn.com/)
 - Icons from [Lucide React](https://lucide.dev/)
-
-## 📞 Support
-
-If you have any questions or need help, please:
-- Open an issue on GitHub
-- Contact: [your-email@example.com]
-
----
 
 **⭐ If you find this project helpful, please give it a star on GitHub!**
